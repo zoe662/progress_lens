@@ -1,0 +1,4 @@
+interface:
+  display_name: "Progress Updater"
+  short_description: "Prepare and post ClickUp progress updates"
+  default_prompt: "Use $progress-updater to prepare and post this week's ClickUp progress update."
