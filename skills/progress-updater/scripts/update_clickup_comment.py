@@ -2,6 +2,7 @@ import argparse
 import html
 import json
 import os
+from pathlib import Path
 import re
 import secrets
 import threading
@@ -22,6 +23,11 @@ parser.add_argument("--task-id", required=True)
 parser.add_argument("--task-name", required=True)
 parser.add_argument("--content", required=True)
 parser.add_argument("--evaluation", default="", help="Evaluation result to display on the confirmation page.")
+parser.add_argument(
+    "--evaluation-file",
+    default="",
+    help="Path to a local evaluation JSON or Markdown file to display on the confirmation page.",
+)
 parser.add_argument("--host", default="127.0.0.1")
 parser.add_argument("--port", type=int, default=8765)
 
@@ -30,11 +36,24 @@ args = parser.parse_args()
 TASK_ID = args.task_id
 TASK_NAME = args.task_name
 DEFAULT_CONTENT = args.content
-DEFAULT_EVALUATION = args.evaluation
 CONFIRM_TOKEN = secrets.token_urlsafe(32)
 
 app = Flask(__name__)
 server = None
+
+
+def load_evaluation() -> str:
+    if args.evaluation_file:
+        path = Path(args.evaluation_file).expanduser()
+        if not path.exists():
+            raise SystemExit(f"Evaluation file not found: {path}")
+        if not path.is_file():
+            raise SystemExit(f"Evaluation path is not a file: {path}")
+        return path.read_text(encoding="utf-8")
+    return args.evaluation
+
+
+DEFAULT_EVALUATION = load_evaluation()
 
 
 def update_clickup(content: str):

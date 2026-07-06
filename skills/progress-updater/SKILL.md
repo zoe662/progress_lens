@@ -43,25 +43,29 @@ python3 skills/progress-updater/scripts/download_last_week_progress.py
 5. Collect only the fields required by `references/update-rules.md`.
    - Do not ask for the date; use the local date.
    - Do not invent missing progress details.
-   - If information is insufficient, ask concise follow-up questions until the update can be prepared.
+   - If information is insufficient or does not satisfy `references/update-rules.md`, ask at most three concise follow-up questions per reply.
+   - When asking follow-up questions, output only the questions as a short numbered list. Do not add explanations, evaluation notes, praise, summaries, or extra context.
+   - Continue asking follow-up questions until the update satisfies the rules or the user explicitly says to stop, end, use the current information, or not provide more details.
+   - If the user stops before all details are complete, prepare the update from the available information without inventing missing content, and let the evaluation record the gaps and deductions.
 6. Format the final comment exactly according to `references/update-rules.md`.
 7. Before posting, read `references/evaluation-rules.md` and evaluate the final prepared update against:
    - the selected project's latest row in `assets/last_week_progress.csv`
    - the selected project's `text_content` milestones in `assets/projects_list.csv`
    - the final prepared comment content
-   This evaluation is a scoring step only. Do not ask follow-up questions during evaluation. If information is missing, assign the score according to `evaluation-rules.md` and note the deduction. Prefer the JSON output format defined in `evaluation-rules.md` so the confirmation page can render a dashboard.
-8. Show the final task name, comment content, and evaluation result to the user for confirmation before posting.
-9. After confirmation, run the local browser confirmation script and pass the evaluation result with `--evaluation`:
+   This evaluation is a scoring step only. Do not ask follow-up questions during evaluation. If information is missing, assign the score according to `evaluation-rules.md` and note the deduction.
+8. Write the evaluation JSON directly to a local file. Do not print or paste the evaluation JSON in the conversation. Use a temporary file path such as `/tmp/progress-updater-evaluation-{task-id}.json`, and make the file content exactly match the JSON format defined in `evaluation-rules.md` so the confirmation page can render a dashboard.
+9. Show only the final task name and comment content in the conversation. Do not include the evaluation result in the chat response.
+10. Immediately run the local browser confirmation script and pass the evaluation file with `--evaluation-file`:
 
 ```bash
 python3 skills/progress-updater/scripts/update_clickup_comment.py \
   --task-id "{task-id}" \
   --task-name "{task-name}" \
   --content "{content}" \
-  --evaluation "{evaluation-result}"
+  --evaluation-file "/tmp/progress-updater-evaluation-{task-id}.json"
 ```
 
-The script starts a Flask confirmation page bound to `127.0.0.1` and opens it in the user's browser. The page displays the evaluation result as a dashboard above the editable update content, including the total score, dimension score bars, comparison tables, and deduction notes. Do not bypass the browser confirmation step. The final ClickUp API request must only be sent after the user reviews the local page and clicks the confirmation button. Do not add or use a headless/direct-post option.
+The script starts a Flask confirmation page bound to `127.0.0.1` and opens it in the user's browser. The page reads the evaluation file and displays the evaluation result as a dashboard above the editable update content, including the total score, dimension score bars, comparison tables, and deduction notes. This local page is the required confirmation step. Do not bypass it. The final ClickUp API request must only be sent after the user reviews the local page and clicks the confirmation button. Do not add or use a headless/direct-post option.
 
 ## Environment
 

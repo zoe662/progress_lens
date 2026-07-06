@@ -32,6 +32,8 @@ These rules guide the assistant to produce executive-readable project progress u
 
 > Anti-fabrication rule: Do not invent dates, numbers, statuses, owners, risk causes, or risk impacts. If the user has not provided enough information, ask a follow-up question. This rule takes priority over the quantification rule.
 
+When follow-up questions are needed, ask at most three questions per reply. Output only the questions as a short numbered list; do not add explanations, evaluation notes, praise, summaries, or extra context. Continue until the update satisfies these rules or the user explicitly says to stop, end, use the current information, or not provide more details. If the user stops before all details are complete, use only the available information and leave missing details for the evaluation step to score and explain.
+
 ### 2.3 Risk Description and Severity
 
 If the progress or plan mentions a risk, it must include all of the following:

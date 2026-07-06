@@ -128,13 +128,13 @@ If an item says `continue tracking`, it must specify the tracking target, decisi
 
 ---
 
-## 4. Final Output Format
+## 4. Evaluation File Format
 
-The evaluation output should be structured JSON by default so `scripts/update_clickup_comment.py` can render it as a dashboard. Every scoring dimension must include a score, max score, and specific explanation.
+The evaluation must be written to a local JSON file and passed to `scripts/update_clickup_comment.py` with `--evaluation-file`. Do not paste the evaluation JSON into the conversation. Every scoring dimension must include a score, max score, and specific explanation.
 
-### 4.1 Default Output: JSON
+### 4.1 Default File Content: JSON
 
-Output a single JSON object. Do not wrap it in a Markdown code fence. Field names are fixed:
+Write a single JSON object. Do not wrap it in a Markdown code fence. Field names are fixed:
 
 ```json
 {
@@ -207,9 +207,9 @@ Output a single JSON object. Do not wrap it in a Markdown code fence. Field name
 
 Dimension explanations must include deduction reasons, verifiable evidence, and missing information. If a dimension cannot be fully scored because of insufficient data, still assign a provisional score and mark the missing data in `explanation`, `comparisons`, or `deductions`. Do not ask follow-up questions during evaluation.
 
-### 4.2 Compatible Output: Markdown Fallback
+### 4.2 Compatible Input: Markdown Fallback
 
-Use Markdown only if JSON is not possible. The confirmation page will try to parse these sections into a dashboard:
+Use Markdown only if JSON is not possible. If used, write it to a local file and pass that file with `--evaluation-file`; do not paste it into the conversation. The confirmation page will try to parse these sections into a dashboard:
 
 ```text
 ## Evaluation Summary
