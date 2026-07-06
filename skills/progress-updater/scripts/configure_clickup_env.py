@@ -66,9 +66,9 @@ def update_activation_file(path: Path, start: str, end: str, block: str):
 
 def write_clickup_env(clickup_token: str, clickup_list_id: str):
     if not VENV_PATH.exists():
-        raise RuntimeError(f"找不到虛擬環境：{VENV_PATH}")
+        raise RuntimeError(f"Virtual environment not found: {VENV_PATH}")
     if any(char in clickup_token + clickup_list_id for char in "\r\n"):
-        raise RuntimeError("CLICKUP_TOKEN 和 CLICKUP_LIST_ID 不可包含換行字元。")
+        raise RuntimeError("CLICKUP_TOKEN and CLICKUP_LIST_ID must not contain newline characters.")
 
     values = {
         "CLICKUP_TOKEN": clickup_token,
@@ -117,7 +117,7 @@ def write_clickup_env(clickup_token: str, clickup_list_id: str):
         updated.append(powershell_activate)
 
     if not updated:
-        raise RuntimeError(f"找不到可寫入的 activate 檔案：{VENV_PATH}")
+        raise RuntimeError(f"No writable activation file found under: {VENV_PATH}")
 
     return updated
 
@@ -146,15 +146,15 @@ def render_page(message=None, error=None, updated_files=None, posted=False, valu
     disabled = "disabled" if posted else ""
 
     return f"""<!doctype html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ClickUp 環境變數設定</title>
+  <title>ClickUp Environment Configuration</title>
   <style>
     :root {{
       color-scheme: light;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #eef2f7;
       color: #172033;
     }}
@@ -258,8 +258,8 @@ def render_page(message=None, error=None, updated_files=None, posted=False, valu
 </head>
 <body>
   <main>
-    <h1>ClickUp 環境變數設定</h1>
-    <p>請輸入 ClickUp 設定值。送出後會寫入虛擬環境的 activate 檔案。</p>
+    <h1>ClickUp Environment Configuration</h1>
+    <p>Enter the ClickUp settings. After submission, they will be written to the virtual environment activation files.</p>
     {message_html}
     {error_html}
     {files_html}
@@ -267,12 +267,12 @@ def render_page(message=None, error=None, updated_files=None, posted=False, valu
       <input type="hidden" name="confirm_token" value="{CONFIRM_TOKEN}">
       <label for="clickup_token">CLICKUP_TOKEN</label>
       <input id="clickup_token" name="clickup_token" type="password" autocomplete="off" value="{clickup_token}" required {disabled}>
-      <div class="hint">Token 只會寫入本機設定檔，不會顯示在終端機輸出。</div>
+      <div class="hint">The token is written only to local configuration files and is not printed in terminal output.</div>
       <label for="clickup_list_id">CLICKUP_LIST_ID</label>
       <input id="clickup_list_id" name="clickup_list_id" autocomplete="off" value="{clickup_list_id}" required {disabled}>
       <div class="actions">
-        <button type="button" onclick="window.close()">取消</button>
-        <button type="submit" {disabled}>儲存設定</button>
+        <button type="button" onclick="window.close()">Cancel</button>
+        <button type="submit" {disabled}>Save Settings</button>
       </div>
     </form>
   </main>
@@ -288,14 +288,14 @@ def index():
 @app.post("/submit")
 def submit():
     if request.form.get("confirm_token") != CONFIRM_TOKEN:
-        return render_page(error="確認權杖不正確，請回到原設定頁重新送出。"), 403
+        return render_page(error="Invalid confirmation token. Return to the original configuration page and submit again."), 403
 
     clickup_token = request.form.get("clickup_token", "").strip()
     clickup_list_id = request.form.get("clickup_list_id", "").strip()
 
     if not clickup_token or not clickup_list_id:
         return render_page(
-            error="CLICKUP_TOKEN 和 CLICKUP_LIST_ID 都必須填寫。",
+            error="CLICKUP_TOKEN and CLICKUP_LIST_ID are both required.",
             values={"CLICKUP_TOKEN": clickup_token, "CLICKUP_LIST_ID": clickup_list_id},
         ), 400
 
@@ -303,13 +303,13 @@ def submit():
         updated_files = write_clickup_env(clickup_token, clickup_list_id)
     except Exception as e:
         return render_page(
-            error=f"設定失敗：{e}",
+            error=f"Configuration failed: {e}",
             values={"CLICKUP_TOKEN": clickup_token, "CLICKUP_LIST_ID": clickup_list_id},
         ), 500
 
     threading.Timer(1.0, shutdown_server).start()
     return render_page(
-        message="設定已寫入。請重新啟用虛擬環境，讓目前終端機載入新的環境變數。",
+        message="Settings were written. Reactivate the virtual environment so the current terminal loads the new environment variables.",
         updated_files=updated_files,
         posted=True,
         values={"CLICKUP_TOKEN": clickup_token, "CLICKUP_LIST_ID": clickup_list_id},
@@ -325,12 +325,12 @@ def main():
     global server
 
     if args.host != "127.0.0.1":
-        raise SystemExit("基於安全考量，設定頁只能綁定 127.0.0.1。")
+        raise SystemExit("For security, the configuration page must bind only to 127.0.0.1.")
 
     server = make_server(args.host, args.port, app)
     url = f"http://{args.host}:{args.port}/"
-    print(f"ClickUp 環境變數設定頁已啟動：{url}")
-    print("請在瀏覽器輸入設定值並點擊「儲存設定」。")
+    print(f"ClickUp environment configuration page started: {url}")
+    print("Enter the settings in the browser and click Save Settings.")
     webbrowser.open(url)
     server.serve_forever()
 

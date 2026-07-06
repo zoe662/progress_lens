@@ -42,9 +42,9 @@ def comment_text(comment: dict[str, Any]) -> str:
 
 def extract_this_week_progress(text: str) -> str:
     match = re.search(
-        r"#\s*本週進度：?\s*(.*?)(?=\n#\s*下週進度：?|\Z)",
+        r"#\s*This Week's Progress:?\s*(.*?)(?=\n#\s*Next Week's Plan:?\s*|\Z)",
         text,
-        flags=re.DOTALL,
+        flags=re.DOTALL | re.IGNORECASE,
     )
     if not match:
         return text.strip()
@@ -66,13 +66,13 @@ def fetch_latest_comment(task_id: str, headers: dict[str, str]) -> dict[str, Any
 
 def main():
     if not CLICKUP_TOKEN:
-        raise SystemExit("找不到環境變數 CLICKUP_TOKEN")
+        raise SystemExit("Missing environment variable: CLICKUP_TOKEN")
 
     projects_path = next((path for path in PROJECTS_PATHS if path.exists()), None)
     if not projects_path:
         raise SystemExit(
-            "找不到專案清單："
-            + " 或 ".join(str(path) for path in PROJECTS_PATHS)
+            "Could not find a project list: "
+            + " or ".join(str(path) for path in PROJECTS_PATHS)
         )
 
     headers = {
@@ -142,7 +142,7 @@ def main():
         writer.writeheader()
         writer.writerows(rows)
 
-    print(f"已建立 {OUTPUT_PATH}，共 {len(rows)} 筆專案")
+    print(f"Created {OUTPUT_PATH} with {len(rows)} projects")
 
 
 if __name__ == "__main__":

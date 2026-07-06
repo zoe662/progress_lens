@@ -1,278 +1,278 @@
 # ClickUp Progress Evaluation Rules
 
-本規範用於評估最後產出的 ClickUp 進度更新品質，並說明本次更新與「上次更新內容」及「專案里程碑」之間的延續性、落差與風險。此環節只針對最後準備更新的內容進行評分與說明，不再向使用者追問。
+These rules evaluate the quality of the final ClickUp progress update and explain how the current update connects to the previous update and project milestones. This step only scores the prepared update. Do not ask the user follow-up questions during evaluation.
 
 ---
 
-## 一、評估資料來源
+## 1. Evaluation Data Sources
 
-| 資料 | 來源 | 用途 |
+| Data | Source | Purpose |
 | :--- | :--- | :--- |
-| `current_update` | 本次準備發布的進度留言 | 評估本次內容品質與完整性 |
-| `last_week_progress` | `assets/last_week_progress.csv` 或上一則 ClickUp comment | 比對上次「下週進度」是否被本次承接 |
-| `project_milestones` | `assets/projects_list.csv` 的 `text_content` 欄位或使用者提供內容 | 判斷本次進度與里程碑的關聯、落後或提前 |
-| `task_name` / `task_id` | `assets/projects_list.csv` | 確認評估對象是否為正確專案 |
+| `current_update` | The prepared progress comment | Evaluate content quality and completeness. |
+| `last_week_progress` | `assets/last_week_progress.csv` or the previous ClickUp comment | Compare whether the previous `Next Week's Plan` was addressed. |
+| `project_milestones` | The `text_content` field in `assets/projects_list.csv`, or user-provided milestone content | Determine whether the update aligns with, leads, or lags milestones. |
+| `task_name` / `task_id` | `assets/projects_list.csv` | Confirm that the evaluation targets the correct project. |
 
-若任一資料缺失，評估時必須明確標示「資料不足」，不可自行補齊、推測或產生不存在的里程碑與進度。
+If any source is missing, explicitly mark it as `Insufficient Data`. Do not fill gaps, infer milestones, or invent progress.
 
 ---
 
-## 二、總分與等級
+## 2. Total Score and Levels
 
-每次評估滿分為 100 分，分為五個維度：
+Each evaluation is scored out of 100 across five dimensions:
 
-| 維度 | 分數 | 評估重點 |
+| Dimension | Points | Evaluation Focus |
 | :--- | ---: | :--- |
-| 內容具體度 | 25 | 是否有明確成果、交付物、數字、影響範圍 |
-| 上週計畫承接度 | 25 | 是否回應上一則更新中的下週計畫 |
-| 里程碑一致性 | 20 | 是否符合、提前或落後於里程碑 |
-| 風險與阻礙透明度 | 15 | 是否揭露風險成因、影響與補救措施 |
-| 下週計畫可執行性 | 15 | 是否有明確完成標準、對象與時間 |
+| Content Specificity | 25 | Clear outcomes, deliverables, numbers, and impact scope |
+| Previous Plan Continuity | 25 | Whether the previous next-week plan is addressed |
+| Milestone Alignment | 20 | Whether the update is on track, ahead, or behind milestones |
+| Risk and Blocker Transparency | 15 | Whether causes, impacts, and mitigations are disclosed |
+| Next Plan Executability | 15 | Whether next steps have clear criteria, owners, or timing |
 
-總分等級：
+Score levels:
 
-| 分數 | 等級 | 說明 |
+| Score | Level | Meaning |
 | :--- | :--- | :--- |
-| 90-100 | A | 內容完整，可直接發布或作為管理追蹤依據 |
-| 80-89 | B | 大致完整，仍有少量資訊不足 |
-| 70-79 | C | 可理解但資訊不足，評分說明需標示缺口 |
-| 60-69 | D | 有明顯缺漏，難以判斷真實進度 |
-| 0-59 | E | 不符合更新要求，應重寫 |
+| 90-100 | A | Complete enough to publish and use for management tracking |
+| 80-89 | B | Mostly complete with a few information gaps |
+| 70-79 | C | Understandable but missing information; scoring notes must identify gaps |
+| 60-69 | D | Significant gaps; difficult to judge actual progress |
+| 0-59 | E | Does not meet update requirements and should be rewritten |
 
 ---
 
-## 三、各維度評分規則
+## 3. Dimension Scoring Rules
 
-### 3.1 內容具體度（25 分）
+### 3.1 Content Specificity (25 points)
 
-- 25 分：每一項皆有明確成果、交付物或量化數據，且可判斷完成狀態。
-- 18-24 分：多數項目具體，但有少數缺少數字、交付物名稱或影響範圍。
-- 10-17 分：內容偏概括，只能看出工作方向，難以判斷完成程度。
-- 0-9 分：使用大量模糊詞，無法判斷實際產出。
+- 25 points: Every item has a clear outcome, deliverable, or metric, and completion status is verifiable.
+- 18-24 points: Most items are specific, but a few lack numbers, deliverable names, or impact scope.
+- 10-17 points: Content is general and shows direction only; completion level is hard to judge.
+- 0-9 points: The update uses mostly vague language and actual output cannot be determined.
 
-扣分例：
+Deduct points when:
 
-- 使用「進行中」、「討論中」、「處理中」、「持續推進」但未補充明確狀態。
-- 可量化工作未提供數字。
-- 質化工作未指出交付物、決策結果或確認對象。
+- The update says `in progress`, `under discussion`, `being handled`, or `continuing to move forward` without a concrete state.
+- Quantifiable work lacks numbers.
+- Qualitative work does not identify a deliverable, decision result, or confirmation party.
 
-### 3.2 上週計畫承接度（25 分）
+### 3.2 Previous Plan Continuity (25 points)
 
-先從上一則更新的 `# 下週進度` 擷取每一項計畫，再逐項對照本次 `# 本週進度`。
+Extract each item from the previous update's `# Next Week's Plan`, then compare each item against the current `# This Week's Progress`.
 
-每一項標註其中一種狀態：
+Mark each item as one of:
 
-- `已完成`：本次更新明確寫出完成結果。
-- `部分完成`：本次更新有提到，但完成範圍小於原計畫。
-- `延遲`：本次更新指出未完成或延期。
-- `取消`：本次更新指出計畫取消且有原因。
-- `範圍變更`：本次更新指出目標或交付範圍已變更。
-- `未交代`：本次更新未提及該計畫。
+- `Completed`: the current update clearly states the result was completed.
+- `Partially Completed`: the current update mentions the item, but the completed scope is smaller than planned.
+- `Delayed`: the current update states that the item was not completed or was postponed.
+- `Canceled`: the current update states that the item was canceled and gives a reason.
+- `Scope Changed`: the current update states that the target or deliverable scope changed.
+- `Not Addressed`: the current update does not mention the item.
 
-評分基準：
+Scoring:
 
-- 25 分：上一則下週計畫均有明確交代，且未交代項目為 0。
-- 18-24 分：大多數項目有交代，僅 1 項資訊不足。
-- 10-17 分：僅部分項目有承接，存在多項未交代。
-- 0-9 分：幾乎沒有回應上一則下週計畫。
+- 25 points: Every previous plan item is clearly addressed, with zero `Not Addressed` items.
+- 18-24 points: Most items are addressed, with only one information gap.
+- 10-17 points: Only some items are addressed, with multiple unaddressed items.
+- 0-9 points: The update barely responds to the previous plan.
 
-`未交代` 不可自動視為已完成，必須扣分並在說明中標示。
+`Not Addressed` must not be treated as completed. Deduct points and identify the gap.
 
-### 3.3 里程碑一致性（20 分）
+### 3.3 Milestone Alignment (20 points)
 
-比對本次更新與專案里程碑，說明目前狀態：
+Compare the current update with project milestones and label the status:
 
-- `符合進度`：本次成果支撐最近一個里程碑如期完成。
-- `提前`：本次成果已完成未來里程碑的部分或全部交付物。
-- `落後`：本次成果未達成應完成的里程碑內容。
-- `有風險`：目前尚未落後，但已出現可能影響里程碑的阻礙。
-- `資料不足`：缺少里程碑或本次內容不足以判斷。
+- `On Track`: current outcomes support the nearest milestone being completed on time.
+- `Ahead`: current outcomes already complete part or all of a future milestone.
+- `Behind`: current outcomes do not meet the milestone that should have been completed.
+- `At Risk`: the project is not yet behind, but blockers may affect a milestone.
+- `Insufficient Data`: milestone data or current update content is insufficient.
 
-評分基準：
+Scoring:
 
-- 20 分：清楚指出與最近里程碑的關係，並有證據支持。
-- 14-19 分：可大致判斷里程碑狀態，但缺少部分證據。
-- 7-13 分：只提到里程碑名稱，未說明進度關係。
-- 0-6 分：無法判斷是否符合里程碑。
+- 20 points: The relationship to the nearest milestone is clear and evidence-backed.
+- 14-19 points: Milestone status is mostly clear, but some evidence is missing.
+- 7-13 points: The update mentions a milestone but does not explain the relationship.
+- 0-6 points: Milestone alignment cannot be determined.
 
-不得自行新增里程碑日期、任務或完成狀態。
+Do not invent milestone dates, tasks, or completion states.
 
-### 3.4 風險與阻礙透明度（15 分）
+### 3.4 Risk and Blocker Transparency (15 points)
 
-若本次更新或里程碑比較顯示風險，需包含：
+If the current update or milestone comparison indicates risk, the evaluation should look for:
 
-1. 成因
-2. 影響範圍
-3. 對時程或里程碑的影響
-4. 已採取或預計採取的補救措施
+1. Cause
+2. Impact scope
+3. Schedule or milestone impact
+4. Mitigation already taken or planned
 
-評分基準：
+Scoring:
 
-- 15 分：風險描述完整，且有補救措施。
-- 10-14 分：有風險描述，但缺少部分影響或補救資訊。
-- 5-9 分：只提到阻礙，無法判斷影響。
-- 0-4 分：存在明顯風險但完全未揭露。
+- 15 points: Risk is complete and includes mitigation.
+- 10-14 points: Risk is described but some impact or mitigation detail is missing.
+- 5-9 points: A blocker is mentioned, but impact cannot be judged.
+- 0-4 points: A clear risk exists but is not disclosed.
 
-若沒有風險且內容足以支持此判斷，可給滿分；若資料不足，不可假設無風險。
+If there is no risk and the content is sufficient to support that conclusion, give full points. If data is insufficient, do not assume there is no risk.
 
-### 3.5 下週計畫可執行性（15 分）
+### 3.5 Next Plan Executability (15 points)
 
-評估本次 `# 下週進度` 是否可追蹤：
+Evaluate whether `# Next Week's Plan` is trackable:
 
-- 15 分：每一項都有明確執行內容、完成標準、協作對象或預計時間。
-- 10-14 分：多數項目可追蹤，但部分缺少完成標準。
-- 5-9 分：只有方向，缺少可驗收條件。
-- 0-4 分：計畫空泛，無法作為下週追蹤依據。
+- 15 points: Every item includes clear work, completion criteria, collaborator, or expected time.
+- 10-14 points: Most items are trackable, but some lack completion criteria.
+- 5-9 points: Items show direction only and lack acceptance conditions.
+- 0-4 points: The plan is too vague to track next week.
 
-「持續追蹤」若未說明追蹤對象、判斷基準與預期結果，必須扣分並在說明中標示。
+If an item says `continue tracking`, it must specify the tracking target, decision criteria, and expected result. Otherwise, deduct points.
 
 ---
 
-## 四、最後輸出格式
+## 4. Final Output Format
 
-評估最後輸出應以「結構化 JSON」為主，讓 `scripts/update_clickup_comment.py` 的確認頁能將結果渲染成儀表板。每一個評估維度都必須同時提供分數、滿分與具體說明，不可只給總分或只給文字評論。
+The evaluation output should be structured JSON by default so `scripts/update_clickup_comment.py` can render it as a dashboard. Every scoring dimension must include a score, max score, and specific explanation.
 
-### 4.1 預設輸出：JSON
+### 4.1 Default Output: JSON
 
-輸出必須是單一 JSON object，不要包在 Markdown code fence 中。欄位名稱固定如下：
+Output a single JSON object. Do not wrap it in a Markdown code fence. Field names are fixed:
 
 ```json
 {
   "summary": {
     "total_score": 67,
     "level": "D",
-    "judgement": "可理解目前方向，但資訊不足，管理追蹤力偏弱。"
+    "judgement": "The update is understandable, but missing API completion counts, test metrics, issue counts, and milestone impact."
   },
   "dimensions": [
     {
-      "name": "內容具體度",
+      "name": "Content Specificity",
       "score": 14,
       "max_score": 25,
-      "explanation": "已說明主要成果，但缺少可驗證數字與交付物狀態。"
+      "explanation": "The update states the main outcomes, but lacks verifiable numbers and deliverable status."
     },
     {
-      "name": "上週計畫承接度",
+      "name": "Previous Plan Continuity",
       "score": 19,
       "max_score": 25,
-      "explanation": "有承接多數上週計畫，但部分完成範圍不明。"
+      "explanation": "Most previous plan items are addressed, but completion scope is unclear."
     },
     {
-      "name": "里程碑一致性",
+      "name": "Milestone Alignment",
       "score": 12,
       "max_score": 20,
-      "explanation": "可看出與里程碑相關，但缺少達成證據。"
+      "explanation": "The update is related to milestones, but lacks evidence of milestone completion."
     },
     {
-      "name": "風險與阻礙透明度",
+      "name": "Risk and Blocker Transparency",
       "score": 9,
       "max_score": 15,
-      "explanation": "有揭露風險，但缺少成因、影響與補救期限。"
+      "explanation": "Risk is disclosed, but cause, impact, and mitigation deadline are missing."
     },
     {
-      "name": "下週計畫可執行性",
+      "name": "Next Plan Executability",
       "score": 13,
       "max_score": 15,
-      "explanation": "下週目標明確，但缺少完成標準或確認對象。"
+      "explanation": "The next objective is clear, but completion criteria and confirmation owner are missing."
     }
   ],
   "comparisons": {
     "last_week_plan": [
       {
-        "上次下週計畫": "完成剩餘 API 串接",
-        "本次對應內容": "剩餘 API 已陸續完成串接",
-        "狀態": "部分完成",
-        "說明": "未明確說明是否全數完成。"
+        "previous_plan": "Complete the remaining API integrations",
+        "current_evidence": "Remaining APIs have gradually been integrated",
+        "status": "Partially Completed",
+        "explanation": "The update does not state whether all APIs were completed."
       }
     ],
     "milestones": [
       {
-        "里程碑": "2026-07-15: 完成 SIT 測試",
-        "本次相關進度": "已開始測試，下週預計完成 SIT",
-        "狀態": "有風險",
-        "說明": "已有測試問題待修正，但缺少影響範圍。"
+        "milestone": "2026-07-15: Complete SIT testing",
+        "current_evidence": "Testing has started and SIT is planned for next week",
+        "status": "At Risk",
+        "explanation": "Issues were found during testing, but impact scope is missing."
       }
     ]
   },
   "deductions": [
     {
-      "項目": "SIT 測試數據",
-      "影響維度": "內容具體度、里程碑一致性",
-      "扣分原因": "未提供測試案例數、通過數、失敗數或測試範圍。"
+      "item": "SIT test metrics",
+      "affected_dimensions": "Content Specificity, Milestone Alignment",
+      "reason": "The update does not provide test case counts, passed counts, failed counts, or tested scope."
     }
   ]
 }
 ```
 
-`summary.total_score` 必須等於 `dimensions` 各項 `score` 加總。`summary.level` 必須依照「二、總分與等級」計算。若任一比較表沒有資料，仍需輸出空陣列 `[]`，不可省略欄位。
+`summary.total_score` must equal the sum of all `dimensions[].score` values. `summary.level` must follow Section 2. If any comparison table has no data, output an empty array `[]`; do not omit the field.
 
-分項說明需包含扣分原因、可驗證依據，以及缺少的資訊。若某項因資料不足無法完整評分，仍需給出暫定分數，並在 `explanation`、`comparisons` 或 `deductions` 中標示「資料不足」及缺少的資料；不得在此環節追問使用者。
+Dimension explanations must include deduction reasons, verifiable evidence, and missing information. If a dimension cannot be fully scored because of insufficient data, still assign a provisional score and mark the missing data in `explanation`, `comparisons`, or `deductions`. Do not ask follow-up questions during evaluation.
 
-### 4.2 相容輸出：Markdown fallback
+### 4.2 Compatible Output: Markdown Fallback
 
-若外部環境無法使用 JSON，才可輸出舊版 Markdown 格式。確認頁仍會嘗試解析以下區塊並轉成儀表板：
+Use Markdown only if JSON is not possible. The confirmation page will try to parse these sections into a dashboard:
 
 ```text
-## 評估總結
-- 總分：XX/100（等級）
-- 判斷：一句話說明本次更新是否可發布、需補充或應重寫
+## Evaluation Summary
+- Total Score: XX/100 (Level)
+- Judgement: One sentence stating whether the update can be published, needs more detail, or should be rewritten
 
-## 分項成績
-| 維度 | 分數 | 說明 |
+## Dimension Scores
+| Dimension | Score | Explanation |
 | :--- | ---: | :--- |
-| 內容具體度 | XX/25 | ... |
-| 上週計畫承接度 | XX/25 | ... |
-| 里程碑一致性 | XX/20 | ... |
-| 風險與阻礙透明度 | XX/15 | ... |
-| 下週計畫可執行性 | XX/15 | ... |
+| Content Specificity | XX/25 | ... |
+| Previous Plan Continuity | XX/25 | ... |
+| Milestone Alignment | XX/20 | ... |
+| Risk and Blocker Transparency | XX/15 | ... |
+| Next Plan Executability | XX/15 | ... |
 
-## 與上次更新比較
-| 上次下週計畫 | 本次對應內容 | 狀態 | 說明 |
+## Previous Update Comparison
+| Previous Plan | Current Evidence | Status | Explanation |
 | :--- | :--- | :--- | :--- |
 
-## 與里程碑比較
-| 里程碑 | 本次相關進度 | 狀態 | 說明 |
+## Milestone Comparison
+| Milestone | Current Evidence | Status | Explanation |
 | :--- | :--- | :--- | :--- |
 
-## 資訊不足與扣分註記
-| 項目 | 影響維度 | 扣分原因 |
+## Information Gaps and Deductions
+| Item | Affected Dimensions | Reason |
 | :--- | :--- | :--- |
 ```
 
 ---
 
-## 五、資訊不足註記規則
+## 5. Information Gap Notes
 
-遇到下列情況，必須列入「資訊不足與扣分註記」，並反映在對應維度分數中：
+Include an item in `deductions` when any of the following occurs, and reflect it in the relevant dimension score:
 
-- 上次 `# 下週進度` 有項目在本次更新中未交代。
-- 本次進度使用模糊詞，無法判斷完成狀態。
-- 本次進度可能影響里程碑，但未說明影響程度。
-- 有風險但缺少成因、影響範圍、時程影響或補救措施。
-- 下週計畫缺少完成標準、協作對象或預計時間。
-- 缺少 `last_week_progress` 或 `project_milestones`，導致無法比較。
+- A previous `# Next Week's Plan` item is not addressed in the current update.
+- The current update uses vague wording and completion status cannot be judged.
+- The current update may affect a milestone but does not explain the impact.
+- Risk exists but lacks cause, impact scope, schedule impact, or mitigation.
+- The next-week plan lacks completion criteria, collaborator, or expected time.
+- `last_week_progress` or `project_milestones` is missing, preventing comparison.
 
-註記需具體指出缺少哪一項資訊及其影響，不可只寫「資訊不足」。
-
----
-
-## 六、禁止事項
-
-- 不可替使用者推測上週計畫是否完成。
-- 不可自行建立不存在的里程碑、日期、風險或完成狀態。
-- 不可因語氣正面就提高分數；評分必須依可驗證內容。
-- 不可忽略上次更新中的未完成項目。
-- 不可只給總分而不說明扣分原因。
-- 不可把「沒有提到風險」直接視為「沒有風險」；必須看內容是否足以支持。
-- 不可在評估環節提出追問或要求使用者補充；只能根據現有內容評分與註記。
+Each note must identify the missing information and its effect. Do not write only `Insufficient Data`.
 
 ---
 
-## 七、評估前自我檢查
+## 6. Prohibited Actions
 
-- [ ] 是否已取得本次更新內容？
-- [ ] 是否已取得上一則更新或 `last_week_progress.csv`？
-- [ ] 是否已取得專案里程碑或確認資料不足？
-- [ ] 是否逐項比對上一則 `# 下週進度`？
-- [ ] 是否逐項比對最近里程碑？
-- [ ] 是否列出明確扣分理由？
-- [ ] 是否把所有無法判斷的地方列入扣分註記？
+- Do not infer that a previous plan item was completed.
+- Do not invent milestones, dates, risks, or completion states.
+- Do not raise the score because the tone is positive; score only verifiable content.
+- Do not ignore unfinished items from the previous update.
+- Do not provide only a total score without deduction reasons.
+- Do not treat `no risk mentioned` as `no risk`; the content must support the conclusion.
+- Do not ask follow-up questions during evaluation. Score only the available content and note gaps.
+
+---
+
+## 7. Evaluation Self-Check
+
+- [ ] Have you obtained the current update?
+- [ ] Have you obtained the previous update or `last_week_progress.csv`?
+- [ ] Have you obtained project milestones, or marked them as insufficient data?
+- [ ] Have you compared each previous `# Next Week's Plan` item?
+- [ ] Have you compared the nearest milestones?
+- [ ] Have you listed concrete deduction reasons?
+- [ ] Have you included every unverifiable item in the deduction notes?

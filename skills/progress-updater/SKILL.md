@@ -5,7 +5,7 @@ description: Update ClickUp project progress comments from user-provided weekly 
 
 # ClickUp Progress Update
 
-協助使用者依照固定規範整理專案進度，確認後更新到 ClickUp task comment。
+Prepare project progress updates according to fixed rules, confirm the final draft, and then post it as a ClickUp task comment.
 
 ## Required Resources
 

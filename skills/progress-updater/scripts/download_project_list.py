@@ -14,10 +14,10 @@ CLICKUP_LIST_ID = os.getenv("CLICKUP_LIST_ID")
 output = pathlib.Path(__file__).parent.parent / 'assets' / 'projects_list.csv'
 
 if not CLICKUP_TOKEN:
-    raise SystemExit("找不到環境變數 CLICKUP_TOKEN")
+    raise SystemExit("Missing environment variable: CLICKUP_TOKEN")
 
 if not CLICKUP_LIST_ID:
-    raise SystemExit("找不到環境變數 CLICKUP_LIST_ID")
+    raise SystemExit("Missing environment variable: CLICKUP_LIST_ID")
 
 headers = {
     "accept": "application/json",
@@ -49,5 +49,4 @@ with output.open('w', newline='', encoding='utf-8') as f:
     writer.writerow(['id', 'name', 'text_content'])
     writer.writerows([task['id'], task['name'], task['text_content']] for task in tasks)
 
-print(f"已更新 {output}，共 {len(tasks)} 筆任務")
-
+print(f"Updated {output} with {len(tasks)} tasks")

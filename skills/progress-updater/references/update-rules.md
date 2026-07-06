@@ -1,144 +1,144 @@
 # ClickUp Progress Update Rules
 
-本規範旨在透過結構化引導，確保產出的進度報告具備「長官視角」：可判斷是否有實質推進、是否影響時程、下一步由誰負責。同時強制防呆機制，避免資訊遺失或內容被自動捏造。
+These rules guide the assistant to produce executive-readable project progress updates: the update must show whether meaningful progress was made, whether the schedule is affected, and who owns the next step. The rules also prevent missing information and fabricated details.
 
 ---
 
-## 一、Fields 定義
+## 1. Field Definitions
 
-| Field | 來源 | 規則 | 產出範例 |
+| Field | Source | Rule | Output Example |
 | :--- | :--- | :--- | :--- |
-| `date` | 系統 | 自動抓取本機日期，格式為 `YYYY/MM/DD`，不詢問使用者。 | `日期: 2026/07/03 更新。` |
-| `task_name` | 使用者 | 需存在於 `assets/projects_list.csv`，經確認後對應唯一任務。 | (內部識別，不呈現於報告) |
-| `task_id` | `assets/projects_list.csv` | 由 `task_name` 查得，不詢問使用者。 | (內部識別，不呈現於報告) |
-| `last_week_progress` | 使用者 | 最多 3 點，至少 1 點。 | `# 本週進度：{content}` |
-| `next_week_plan` | 使用者 | 最多 3 點，至少 1 點。 | `# 下週進度：{content}` |
+| `date` | System | Use the local date automatically in `YYYY/MM/DD` format. Do not ask the user for the date. | `Date: 2026/07/03 update.` |
+| `task_name` | User | Must exist in `assets/projects_list.csv` and must map to exactly one task after confirmation. | Internal only; do not show in the report. |
+| `task_id` | `assets/projects_list.csv` | Look up from `task_name`. Do not ask the user for it. | Internal only; do not show in the report. |
+| `last_week_progress` | User | At least 1 item and at most 3 items. | `# This Week's Progress: {content}` |
+| `next_week_plan` | User | At least 1 item and at most 3 items. | `# Next Week's Plan: {content}` |
 
 ---
 
-## 二、內容顆粒度規範
+## 2. Content Granularity Rules
 
-### 2.1 用詞規則（結果導向轉換）
+### 2.1 Result-Oriented Wording
 
-- **禁止使用**：`進行中`、`討論中`、`處理中`、`持續推進` 等無明確狀態的詞彙。
-- **建議使用**：`已完成`、`已提交`、`已確認`、`已部署`、`已取得`、`已彙整`、`已驗證`、`已交付`。
-- `next_week_plan` 若使用 `持續追蹤`，必須同時具體說明追蹤對象、預計完成時間、判斷基準，不可單獨使用。
+- Avoid vague wording such as `in progress`, `under discussion`, `being handled`, and `continuing to move forward` unless the item also includes a clear state and outcome.
+- Prefer result-oriented wording such as `completed`, `submitted`, `confirmed`, `deployed`, `obtained`, `compiled`, `validated`, and `delivered`.
+- If `next_week_plan` uses wording like `continue tracking`, it must specify what will be tracked, the expected completion time, and the decision criteria.
 
-### 2.2 量化與具體化
+### 2.2 Quantification and Specificity
 
-- 若進度性質上**可量化**（如樣本數、開信率、recall/precision、通過率、影響模組數），必須附上具體數字。
-- 若進度性質上**為質化工作**（如決策定案、合約條款確認、文件初稿完成），以明確交付物名稱、狀態、影響範圍取代數字，**不得為了湊數字而虛構**。
-- 判斷原則：能量化就量化，不能量化就寫清楚「做了什麼、對誰／哪個模組、結果如何」。
+- If the work is naturally quantifiable, include concrete numbers, such as sample counts, open rates, recall or precision, pass rates, or affected module counts.
+- If the work is qualitative, use a clear deliverable name, status, and impact scope instead of inventing numbers.
+- Decision rule: quantify when quantification is natural; otherwise state what was done, for whom or which module, and what the result was.
 
-> ⚠️ **防捏造鐵則**：任何日期、數字、狀態、負責單位、風險成因、風險影響，若使用者未提供或提供不完整，**一律追問，不得推測或自行生成**。這條規則優先於「量化必填」規則。
+> Anti-fabrication rule: Do not invent dates, numbers, statuses, owners, risk causes, or risk impacts. If the user has not provided enough information, ask a follow-up question. This rule takes priority over the quantification rule.
 
-### 2.3 風險描述與分級
+### 2.3 Risk Description and Severity
 
-若進度或計畫中提及風險，需包含以下三項，缺一即追問：
+If the progress or plan mentions a risk, it must include all of the following:
 
-1. **成因**：為什麼會產生風險
-2. **影響範圍**：影響哪個模組／專案／區域
-3. **對時程的具體影響**：延誤幾天、影響哪個里程碑
+1. Cause: why the risk exists
+2. Impact scope: which module, project, or area is affected
+3. Schedule impact: delay duration or affected milestone
 
-風險等級標籤 `[Risk: Low/Medium/High]` 依下列基準判定，不可憑感覺分級：
+Use `[Risk: Low/Medium/High]` only according to these criteria:
 
-| 等級 | 判定基準 |
+| Severity | Criteria |
 | :--- | :--- |
-| High | 已確定影響對外交付日期或委員會報告時程，且尚無替代方案 |
-| Medium | 影響單一模組或內部排程，但有可行的補救／替代方案 |
-| Low | 已識別但尚未實際影響時程，或已有應對措施執行中 |
+| High | The external delivery date or committee reporting schedule is already affected, and no workaround exists. |
+| Medium | A single module or internal schedule is affected, but a feasible mitigation or workaround exists. |
+| Low | The risk is identified but has not yet affected the schedule, or mitigation is already in progress. |
 
-若使用者未提供足以判定等級的資訊，**先追問，不可預設等級**。
+If the user has not provided enough information to determine severity, ask a follow-up question. Do not default the severity.
 
-### 2.4 標籤（Tag）定義
+### 2.4 Tag Definitions
 
-Comment Template 中每一條項目開頭的 `[Tag]`，只能是下列其中一種，不可自創：
+Each item in the comment template must start with exactly one of these tags:
 
-- `[Risk: Low/Medium/High]`：該項目屬於風險說明
-- `[里程碑]`：對外交付、委員會報告、驗收等重大節點
-- `[進度]`：一般已完成的內部工作項目
-- `[待確認]`：需要其他單位／主管確認才能推進的事項（僅用於 `next_week_plan`）
-
----
-
-## 三、項目數量與優先序
-
-- `last_week_progress`、`next_week_plan` 均為**最多 3 點、最少 1 點**，不可為了填滿 3 點而生成空泛內容，也不可為 0 點。
-- 若輸入超過 3 點，依下列優先序凝練保留：
-  1. 風險 / 時程影響類
-  2. 對外交付、委員會里程碑類
-  3. 內部一般完成事項
-- 若輸入內容中，`last_week_progress` 混入未完成或未來規劃，移至 `next_week_plan`（不確定時需向使用者確認，不可自行判斷）；反之 `next_week_plan` 混入已完成事項則移至 `last_week_progress`。
+- `[Risk: Low/Medium/High]`: risk explanation
+- `[Milestone]`: external delivery, committee reporting, acceptance, or other major checkpoint
+- `[Progress]`: ordinary completed internal work
+- `[Pending Confirmation]`: an item that needs another team or manager to confirm before progress can continue; use only in `next_week_plan`
 
 ---
 
-## 四、任務辨識與例外處理
+## 3. Item Count and Priority
 
-- 若 `task_name` 缺失，詢問使用者專案名稱。
-- 若 `assets/projects_list.csv` 無法讀取或不存在，告知使用者並停止流程，**不可憑記憶或推測產生 task_id**。
-- 若找不到符合的任務，請使用者確認或改寫專案名稱。
-- 若有多筆符合，列出所有選項讓使用者選擇，**不可自行推斷選擇**。
-- 若對應任務狀態為已結案／已封存，提示使用者確認是否仍要更新此任務。
-
----
-
-## 五、週期延續性檢查
-
-- 產出本週進度前，若存在上一則 ClickUp 進度留言，先比對其 `next_week_plan` 各項目，標註對應狀態：**已完成 / 延遲 / 取消 / 範圍變更**。
-- 若上次計畫項目未出現在本次輸入中，主動詢問使用者該項目現況，不可默認為已完成或自行省略。
+- `last_week_progress` and `next_week_plan` must each contain at least 1 item and at most 3 items. Do not add filler items just to reach 3.
+- If user input contains more than 3 items, condense and keep items in this priority order:
+  1. Risks or schedule impact
+  2. External delivery or committee milestones
+  3. Ordinary internal completion items
+- If `last_week_progress` includes unfinished work or future plans, move that content to `next_week_plan`. If classification is unclear, ask the user. Do not decide by assumption. Apply the same rule in reverse if `next_week_plan` includes completed work.
 
 ---
 
-## 六、發布前確認與重複留言處理
+## 4. Task Matching and Exceptions
 
-- 正式送出至 ClickUp 前，必須將完整草稿（日期、本週進度、下週進度）呈現給使用者確認，取得明確同意後才可發佈。
-- 若同一週期內已存在本次更新留言，詢問使用者是要**覆蓋更新既有留言**或**新增一則留言**，不可自行決定。
+- If `task_name` is missing, ask the user for the project name.
+- If `assets/projects_list.csv` cannot be read or does not exist, tell the user and stop. Do not generate a task ID from memory or inference.
+- If no task matches, ask the user to confirm or rewrite the project name.
+- If multiple tasks match, list all matching task names and ask the user to choose one. Do not choose by inference.
+- If the matching task is closed or archived, ask the user to confirm whether it should still be updated.
 
 ---
 
-## 七、Follow-Up 規則彙整
+## 5. Continuity Check
 
-| 情境 | 動作 |
+- Before producing this week's progress, compare each item in the previous ClickUp comment's `next_week_plan` with this update's `last_week_progress`. Mark each item as `Completed`, `Delayed`, `Canceled`, or `Scope Changed`.
+- If an item from the previous plan is missing from the user's current input, ask for its status. Do not assume it was completed or omit it.
+
+---
+
+## 6. Pre-Posting Confirmation and Duplicate Handling
+
+- Before posting to ClickUp, show the full draft, including date, this week's progress, and next week's plan, and get explicit user confirmation.
+- If an update comment already exists for the same cycle, ask whether to overwrite the existing comment or add a new comment. Do not decide automatically.
+
+---
+
+## 7. Follow-Up Rules
+
+| Situation | Action |
 | :--- | :--- |
-| `task_name` 缺失 / 無匹配 / 多筆匹配 | 依「四、任務辨識與例外處理」處理 |
-| `last_week_progress` 缺失 | 詢問本週已完成之具體進度 |
-| 內容模糊（無明確狀態詞、無量化或具體交付物） | 追問：完成了哪個具體模組或交付物？結果如何？是否有日期／數量／測試結果？ |
-| 提及風險但資訊不全 | 依「2.3 風險描述與分級」逐項追問 |
-| 超過 3 點 | 依「三、項目數量與優先序」凝練 |
-| 內容跨越本週／下週類別 | 移至對應欄位，不確定時詢問使用者確認 |
-| `next_week_plan` 使用「持續追蹤」但無細節 | 追問追蹤對象、預計完成時間、判斷基準 |
-| 任何日期／數字／狀態／單位／風險成因與影響不完整 | 一律追問，不可推測或捏造 |
+| `task_name` is missing, unmatched, or ambiguous | Follow Section 4. |
+| `last_week_progress` is missing | Ask for specific completed progress from this week. |
+| Content is vague, lacks a clear status, lacks numbers, or lacks a deliverable | Ask which specific module or deliverable was completed, what the result was, and whether there are dates, counts, or test results. |
+| Risk is mentioned but incomplete | Ask for the missing parts listed in Section 2.3. |
+| More than 3 items are provided | Condense according to Section 3. |
+| Content crosses this-week and next-week categories | Move it to the correct field; if unclear, ask the user. |
+| `next_week_plan` says `continue tracking` without details | Ask what will be tracked, expected completion time, and decision criteria. |
+| Any date, number, status, owner, risk cause, or impact is incomplete | Ask a follow-up question. Do not infer or fabricate. |
 
 ---
 
-## 八、輸出前自我檢查（Self-Check）
+## 8. Pre-Output Self-Check
 
-在產出最終留言前，逐項確認：
+Before producing the final comment, verify:
 
-- [ ] 日期格式是否為 `YYYY/MM/DD`
-- [ ] 本週／下週項目是否皆為 1～3 點，無空泛湊數
-- [ ] 是否使用禁用模糊詞（進行中／討論中／處理中／持續推進）
-- [ ] 每項是否包含明確標籤 `[Tag]`
-- [ ] 可量化項目是否附數據；質化項目是否有明確交付物與狀態
-- [ ] 風險項目是否包含成因、影響範圍、時程影響，且等級判定有依據
-- [ ] 本週進度是否與上次留言的下週計畫做過延續性比對
-- [ ] 是否已與使用者確認過完整草稿內容
-- [ ] 是否有任何欄位是模型自行推測或生成，而非使用者提供
+- [ ] Date format is `YYYY/MM/DD`.
+- [ ] This-week and next-week sections each contain 1 to 3 non-filler items.
+- [ ] No vague wording is used without a concrete state or result.
+- [ ] Every item has a valid `[Tag]`.
+- [ ] Quantifiable items include numbers; qualitative items include clear deliverables and statuses.
+- [ ] Risk items include cause, impact scope, schedule impact, and evidence for severity.
+- [ ] This week's progress has been checked against last week's next-week plan.
+- [ ] The user has confirmed the complete draft.
+- [ ] No field was inferred or generated without user-provided evidence.
 
 ---
 
-## 九、Comment Template
+## 9. Comment Template
 
 ```text
-日期: YYYY/MM/DD 更新。
+Date: YYYY/MM/DD update.
 
-# 本週進度：
-1. [Tag] 具體成果：詳細內容（量化數據／交付物／影響範圍）
+# This Week's Progress:
+1. [Tag] Concrete outcome: details, including metrics, deliverables, or impact scope
 2. ...
 3. ...
 
-# 下週進度：
-1. [Tag] 具體執行項目：預計完成日／協調對象／完成標準
+# Next Week's Plan:
+1. [Tag] Concrete action item: expected completion date, collaborator, and completion criteria
 2. ...
 3. ...
 ```

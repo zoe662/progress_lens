@@ -39,7 +39,7 @@ server = None
 
 def update_clickup(content: str):
     if not CLICKUP_TOKEN:
-        raise Exception("找不到環境變數 CLICKUP_TOKEN")
+        raise Exception("Missing environment variable: CLICKUP_TOKEN")
 
     url = f"https://api.clickup.com/api/v2/task/{TASK_ID}/comment"
     payload = {
@@ -59,14 +59,14 @@ def update_clickup(content: str):
 
 def extract_score(evaluation: str) -> str:
     patterns = [
-        r"總分[：:]\s*([0-9]{1,3}\s*/\s*100(?:\s*[（(][^)）]+[)）])?)",
+        r"Total Score[：:]\s*([0-9]{1,3}\s*/\s*100(?:\s*[（(][^)）]+[)）])?)",
         r"([0-9]{1,3}\s*/\s*100(?:\s*[（(][^)）]+[)）])?)",
     ]
     for pattern in patterns:
         match = re.search(pattern, evaluation)
         if match:
             return match.group(1)
-    return "未提供總分"
+    return "Score not provided"
 
 
 def parse_score_value(score_text: str) -> int | None:
@@ -188,17 +188,17 @@ def parse_markdown_evaluation(evaluation: str) -> dict:
     score_text = extract_score(evaluation)
     score = parse_score_value(score_text)
     level_match = re.search(r"[（(]([A-E])[^)）]*[)）]", score_text)
-    judgement_match = re.search(r"判斷[：:]\s*(.+)", evaluation)
+    judgement_match = re.search(r"Judgement[：:]\s*(.+)", evaluation)
 
     dimensions = []
-    for row in markdown_table_after_heading(evaluation, "## 分項成績"):
-        points, max_points = parse_dimension_score(row.get("分數", ""))
+    for row in markdown_table_after_heading(evaluation, "## Dimension Scores"):
+        points, max_points = parse_dimension_score(row.get("Score", ""))
         dimensions.append(
             {
-                "name": row.get("維度", ""),
+                "name": row.get("Dimension", ""),
                 "score": points,
                 "max_score": max_points,
-                "explanation": row.get("說明", ""),
+                "explanation": row.get("Explanation", ""),
             }
         )
 
@@ -207,9 +207,9 @@ def parse_markdown_evaluation(evaluation: str) -> dict:
         "level": level_match.group(1) if level_match else score_level(score),
         "judgement": judgement_match.group(1).strip() if judgement_match else "",
         "dimensions": dimensions,
-        "last_week_comparison": markdown_table_after_heading(evaluation, "## 與上次更新比較"),
-        "milestone_comparison": markdown_table_after_heading(evaluation, "## 與里程碑比較"),
-        "deductions": markdown_table_after_heading(evaluation, "## 資訊不足與扣分註記"),
+        "last_week_comparison": markdown_table_after_heading(evaluation, "## Previous Update Comparison"),
+        "milestone_comparison": markdown_table_after_heading(evaluation, "## Milestone Comparison"),
+        "deductions": markdown_table_after_heading(evaluation, "## Information Gaps and Deductions"),
         "raw": evaluation,
     }
 
@@ -228,11 +228,11 @@ def parse_evaluation(evaluation: str) -> dict:
 
 def status_class(value: str) -> str:
     text = value.lower()
-    if any(token in value for token in ("已完成", "符合進度", "提前")):
+    if any(token in text for token in ("completed", "on track", "ahead")):
         return "status-good"
-    if any(token in value for token in ("部分完成", "有風險", "資料不足")):
+    if any(token in text for token in ("partially completed", "at risk", "insufficient data")):
         return "status-watch"
-    if any(token in value for token in ("延遲", "落後", "未交代", "取消")):
+    if any(token in text for token in ("delayed", "behind", "not addressed", "canceled")):
         return "status-risk"
     if "risk" in text:
         return "status-watch"
@@ -241,7 +241,7 @@ def status_class(value: str) -> str:
 
 def render_dimension_cards(dimensions: list[dict[str, str]]) -> str:
     if not dimensions:
-        return '<p class="empty-state">未提供分項評分。</p>'
+        return '<p class="empty-state">No dimension scores provided.</p>'
 
     cards = []
     for item in dimensions:
@@ -272,7 +272,7 @@ def render_dimension_cards(dimensions: list[dict[str, str]]) -> str:
 
 def render_rows(rows: list[dict], columns: list[tuple[str, str]], status_key: str | None = None) -> str:
     if not rows:
-        return '<p class="empty-state">未提供資料。</p>'
+        return '<p class="empty-state">No data provided.</p>'
 
     header = "".join(f"<th>{html.escape(label)}</th>" for _, label in columns)
     body_rows = []
@@ -282,7 +282,7 @@ def render_rows(rows: list[dict], columns: list[tuple[str, str]], status_key: st
             value = str(row.get(key, ""))
             if key == status_key:
                 cells.append(
-                    f'<td><span class="status-pill {status_class(value)}">{html.escape(value or "未標示")}</span></td>'
+                    f'<td><span class="status-pill {status_class(value)}">{html.escape(value or "Unspecified")}</span></td>'
                 )
             else:
                 cells.append(f"<td>{html.escape(value)}</td>")
@@ -313,8 +313,8 @@ def render_evaluation_dashboard(evaluation: str) -> str:
     <section class="evaluation-dashboard">
       <div class="dashboard-heading">
         <div>
-          <h2>進度評估儀表板</h2>
-          <p>{judgement or "請檢視分項評分與扣分註記。"}</p>
+          <h2>Progress Evaluation Dashboard</h2>
+          <p>{judgement or "Review the dimension scores and deduction notes."}</p>
         </div>
         <div class="score-gauge" style="--score: {gauge_value};">
           <span>{html.escape(score_label)}</span>
@@ -327,33 +327,33 @@ def render_evaluation_dashboard(evaluation: str) -> str:
       </div>
 
       <div class="dashboard-section">
-        <h3>與上次更新比較</h3>
+        <h3>Previous Update Comparison</h3>
         {render_rows(
             parsed.get("last_week_comparison", []),
-            [("上次下週計畫", "上次下週計畫"), ("本次對應內容", "本次對應內容"), ("狀態", "狀態"), ("說明", "說明")],
-            "狀態",
+            [("previous_plan", "Previous Plan"), ("current_evidence", "Current Evidence"), ("status", "Status"), ("explanation", "Explanation")],
+            "status",
         )}
       </div>
 
       <div class="dashboard-section">
-        <h3>與里程碑比較</h3>
+        <h3>Milestone Comparison</h3>
         {render_rows(
             parsed.get("milestone_comparison", []),
-            [("里程碑", "里程碑"), ("本次相關進度", "本次相關進度"), ("狀態", "狀態"), ("說明", "說明")],
-            "狀態",
+            [("milestone", "Milestone"), ("current_evidence", "Current Evidence"), ("status", "Status"), ("explanation", "Explanation")],
+            "status",
         )}
       </div>
 
       <div class="dashboard-section">
-        <h3>資訊不足與扣分註記</h3>
+        <h3>Information Gaps and Deductions</h3>
         {render_rows(
             parsed.get("deductions", []),
-            [("項目", "項目"), ("影響維度", "影響維度"), ("扣分原因", "扣分原因")],
+            [("item", "Item"), ("affected_dimensions", "Affected Dimensions"), ("reason", "Reason")],
         )}
       </div>
 
       <details class="raw-evaluation">
-        <summary>查看原始評估資料</summary>
+        <summary>View Raw Evaluation Data</summary>
         <pre>{raw}</pre>
       </details>
     </section>"""
@@ -368,15 +368,15 @@ def render_page(message=None, error=None, posted=False, content_value=None):
     disabled = "disabled" if posted else ""
 
     return f"""<!doctype html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ClickUp 更新確認</title>
+  <title>ClickUp Update Confirmation</title>
   <style>
     :root {{
       color-scheme: light;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #eef2f7;
       color: #172033;
     }}
@@ -687,20 +687,20 @@ def render_page(message=None, error=None, posted=False, content_value=None):
 </head>
 <body>
   <main>
-    <h1>ClickUp 更新確認</h1>
-    <p>請確認更新內容。只有按下「確認更新」後，程式才會送出至 ClickUp。</p>
+    <h1>ClickUp Update Confirmation</h1>
+    <p>Review the update content. The script will post to ClickUp only after you click Confirm Update.</p>
     {message_html}
     {error_html}
     {evaluation_html}
     <form method="post" action="/submit">
       <input type="hidden" name="confirm_token" value="{CONFIRM_TOKEN}">
-      <label for="task_name">要更新的專案</label>
+      <label for="task_name">Project to Update</label>
       <input id="task_name" value="{task_name}" readonly>
-      <label for="content">更新內容</label>
+      <label for="content">Update Content</label>
       <textarea id="content" name="content" {disabled}>{content}</textarea>
       <div class="actions">
-        <button type="button" onclick="window.close()">取消</button>
-        <button type="submit" {disabled}>確認更新</button>
+        <button type="button" onclick="window.close()">Cancel</button>
+        <button type="submit" {disabled}>Confirm Update</button>
       </div>
     </form>
   </main>
@@ -716,23 +716,23 @@ def index():
 @app.post("/submit")
 def submit():
     if request.form.get("confirm_token") != CONFIRM_TOKEN:
-        return render_page(error="確認權杖不正確，請回到原確認頁重新送出。"), 403
+        return render_page(error="Invalid confirmation token. Return to the original confirmation page and submit again."), 403
 
     content = request.form.get("content", "").strip()
     if not content:
-        return render_page(error="更新內容不可為空。", content_value=content), 400
+        return render_page(error="Update content cannot be empty.", content_value=content), 400
 
     try:
         update_clickup(content)
     except requests.HTTPError as e:
         detail = e.response.text if e.response is not None else str(e)
         status = e.response.status_code if e.response is not None else "HTTP"
-        return render_page(error=f"更新失敗：{status}\n\n{detail}", content_value=content), 502
+        return render_page(error=f"Update failed: {status}\n\n{detail}", content_value=content), 502
     except Exception as e:
-        return render_page(error=f"更新失敗：{e}", content_value=content), 500
+        return render_page(error=f"Update failed: {e}", content_value=content), 500
 
     threading.Timer(1.0, shutdown_server).start()
-    return render_page(message="ClickUp 更新成功，可以關閉此頁面。", posted=True, content_value=content)
+    return render_page(message="ClickUp update succeeded. You can close this page.", posted=True, content_value=content)
 
 
 def shutdown_server():
@@ -744,12 +744,12 @@ def main():
     global server
 
     if args.host != "127.0.0.1":
-        raise SystemExit("基於安全考量，確認頁只能綁定 127.0.0.1。")
+        raise SystemExit("For security, the confirmation page must bind only to 127.0.0.1.")
 
     server = make_server(args.host, args.port, app)
     url = f"http://{args.host}:{args.port}/"
-    print(f"ClickUp 更新確認頁已啟動：{url}")
-    print("請在瀏覽器確認內容並點擊「確認更新」。")
+    print(f"ClickUp update confirmation page started: {url}")
+    print("Review the content in the browser and click Confirm Update.")
     webbrowser.open(url)
     server.serve_forever()
 
